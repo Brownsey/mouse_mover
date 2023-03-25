@@ -21,7 +21,18 @@ class AutoClicker:
     def click(self):
         pyautogui.click()
 
+    def __get_resolution(self):
+        return pyautogui.size()
+    
+    def set_resolution(self, x, y):
+        self.res_x, self.res_y = self.__get_resolution()
+    
+    def move_to(self, x, y):
+        #Moves to specific co-ords
+        pyautogui.moveTo(x, y)
+
     def move(self, x_offset, y_offset):
+        #Moves relative to currently set position
         pyautogui.moveRel(x_offset, y_offset)
 
     def take_break(self, break_interval):
@@ -66,14 +77,34 @@ class AutoClicker:
         # Move the mouse cursor
         self.move(x, y)
 
+    def random_move(self):
+        """Move the mouse cursor to a random location on the screen.
+
+        Parameters:
+        None
+
+        Returns:
+        None
+        """
+        # Get the screen resolution
+        screen_width, screen_height = self.get_resolution()
+        # Generate random x and y coordinates - not including whole screen as there is a click
+        # This click means that you could open a program on your taskbar if set to the whole screen
+        x = random.randint(screen_width/4, 5/6*screen_width)
+        y = random.randint(screen_height/4, 5/6*screen_height)
+        # Move the mouse cursor
+        self.move_to(x, y)
+
     def run(self):
         start_time = time.time()
-        self.take_break([10,12])
+        self.set_resolution()
         self.set_position()
+        self.take_break([10,12])
         while time.time() - start_time < self.run_time:
 
             if self.run_type == "wiggle":
-                self.mouse_wiggle(250, 250)
+                
+                self.random_move()
                 self.take_break([30, 300])
             elif self.run_type == "click":
                 rnd = random.randint(0, 100)
@@ -88,6 +119,11 @@ class AutoClicker:
                     self.take_break([0.5, 2])
                 else:
                     self.pause_skewed(self.right_skew, self.mean, self.std, self.min_value)
+
+                current_x, current_y = self.get_position()
+                if abs(current_x - self.x) > 5 or abs(current_y - self.y) > 5:
+                    self.move_to(self.x, self.y)
+                    
 
                 self.click()
                     
