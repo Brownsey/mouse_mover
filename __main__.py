@@ -2,15 +2,26 @@ from classes.autoclicker import AutoClicker
 import sys
 
 def main():
-    # runs the parameters for the data challenge when this .py is called
-    #run_type = sys.argv[1]
-    #run_time = int(sys.argv[2])
-    #right_skew = int(sys.argv[3])
-    #mean = int(sys.argv[4])
-    #std = int(sys.argv[5])
-    #min_value = int(sys.argv[6])
-    # create an instance of the autoclicker class
-    autoclicker = AutoClicker(run_type="click")
+
+    num_args = len(sys.argv)
+    print("num_args: ", num_args)
+    if num_args > 1:
+        print("running with system args")
+        if num_args == 2:
+            autoclicker = AutoClicker(run_type=sys.argv[1])
+        elif num_args == 3:
+            autoclicker = AutoClicker(run_type=sys.argv[1], run_time=sys.argv[2] )
+        elif num_args == 4:
+            autoclicker = AutoClicker(run_type=sys.argv[1], run_time=sys.argv[2], right_skew=sys.argv[3])
+        elif num_args == 5:
+            autoclicker = AutoClicker(run_type=sys.argv[1], run_time=sys.argv[2], right_skew=sys.argv[3], mean=sys.argv[4])
+        elif num_args == 6:
+            autoclicker = AutoClicker(run_type=sys.argv[1], run_time=sys.argv[2], right_skew=sys.argv[3], mean=sys.argv[4], min_value=sys.argv[5])
+        else:
+            print("too many args")
+    else:
+        print("running with default parameters")
+        autoclicker = AutoClicker()
     # start the autoclicker
     autoclicker.run()
 

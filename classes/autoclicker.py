@@ -2,14 +2,14 @@ import pyautogui
 import random
 import numpy as np
 import time
+from scipy.stats import skewnorm
 
 class AutoClicker:
-    def __init__(self, run_type = "wiggle" ,run_time = 50, right_skew=2, mean=0.5, std=0.35, min_value=0.3):
+    def __init__(self, run_type = "wiggle",run_time = 50, right_skew = 2, mean=0.5,  min_value=0.3):
         self.run_type = run_type
         self.run_time = run_time * 60 # Convert minutes to seconds
         self.right_skew = right_skew
         self.mean = mean
-        self.std = std
         self.min_value = min_value
 
     def set_position(self):
@@ -24,7 +24,7 @@ class AutoClicker:
     def __get_resolution(self):
         return pyautogui.size()
     
-    def set_resolution(self, x, y):
+    def set_resolution(self):
         self.res_x, self.res_y = self.__get_resolution()
     
     def move_to(self, x, y):
@@ -42,21 +42,25 @@ class AutoClicker:
         time.sleep(break_time)
 
 
-    def pause_skewed(self, right_skew=2, mean=5, std=1, min_value=0.5):
+    def pause_skewed(self, skew,mean, min_value=0.5):
         """Pause for a random amount of time based on a right-skewed distribution.
 
         Parameters:
         right_skew (float): Skewness of the distribution, where a higher value corresponds to a more right-skewed distribution. Default is 2.
         mean (float): Mean value of the distribution. Default is 5.
         std (float): Standard deviation of the distribution. Default is 1.
-        min_value (float): Minimum value of the pause duration. Default is 0.5.
+        min_value (float): Minimum value of the pause duration. Default is 0.5, 10% variation is added around this number.
 
         Returns:
         None
         """
+
+        print("running right skewed waiting time")
+        min_value = min_value + random.uniform(-0.1, 0.1) * min_value
         # Generate a random value from a right-skewed distribution
-        value = np.random.normal(loc=mean, scale=std) ** right_skew
+        value = abs(skewnorm.rvs(a = skew, scale = mean))
         value = max(value, min_value)  # enforce minimum value
+
         # Pause the program for the random duration
         print("Pausing for {} seconds".format(value))
         time.sleep(value)
@@ -71,6 +75,7 @@ class AutoClicker:
         Returns:
         None
         """
+        print("Wiggling mouse")
         # Generate random offsets
         x = random.randint(-x_offset, x_offset)
         y = random.randint(-y_offset, y_offset)
@@ -87,12 +92,13 @@ class AutoClicker:
         None
         """
         # Get the screen resolution
-        screen_width, screen_height = self.get_resolution()
+        
         # Generate random x and y coordinates - not including whole screen as there is a click
         # This click means that you could open a program on your taskbar if set to the whole screen
-        x = random.randint(screen_width/4, 5/6*screen_width)
-        y = random.randint(screen_height/4, 5/6*screen_height)
+        x = random.randint(self.res_x/4, 5/6*self.res_y)
+        y = random.randint(self.res_x/4, 5/6*self.res_y)
         # Move the mouse cursor
+        print("Moving mouse to {}, {}".format(x, y))
         self.move_to(x, y)
 
     def run(self):
@@ -112,13 +118,13 @@ class AutoClicker:
             
                 if rnd < 3:
                     self.mouse_wiggle(5,5)
-                    self.pause_skewed(self.right_skew, self.mean, self.std, self.min_value)
+                    self.pause_skewed(self.right_skew, self.mean, self.min_value)
                 elif rnd == 3:
-                    self.pause_skewed(6, 5, self.std, self.min_value)
-                elif rnd < 25:
-                    self.take_break([0.5, 2])
+                    self.pause_skewed(10, 12, self.min_value)
+                elif rnd < 30:
+                    self.take_break([0.3, 1])
                 else:
-                    self.pause_skewed(self.right_skew, self.mean, self.std, self.min_value)
+                    self.pause_skewed(self.right_skew, self.mean,  self.min_value)
 
                 current_x, current_y = self.get_position()
                 if abs(current_x - self.x) > 5 or abs(current_y - self.y) > 5:
@@ -126,6 +132,8 @@ class AutoClicker:
                     
 
                 self.click()
+
+        print("The Mouse Mover has finished running, thank you for using it!")
                     
 
 
