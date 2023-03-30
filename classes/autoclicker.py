@@ -131,7 +131,7 @@ class AutoClicker:
                     self.move_to(self.x, self.y)
                     
 
-                self.click()
+            self.click() # Both methods need a click to work
 
         print("The Mouse Mover has finished running, thank you for using it!")
                     
